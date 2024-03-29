@@ -117,8 +117,7 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
                     s.pop_layer();
                     s.add_layer(Dialog::info(format!(
                         "Usuário cadastrado com sucesso!\nLogin: {}\nUUID: {}",
-                        u.login,
-                        u.id.to_string()
+                        u.login, u.id
                     )));
                 }
                 Err(msg) => {

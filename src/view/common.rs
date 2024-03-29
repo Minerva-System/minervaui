@@ -16,7 +16,7 @@ impl TableViewItem<CommonColumn> for model::user::User {
             CommonColumn::ID => self.id.to_string(),
             CommonColumn::Login => self.login.clone(),
             CommonColumn::Name => self.name.clone(),
-            CommonColumn::Email => self.email.clone().unwrap_or(String::new()),
+            CommonColumn::Email => self.email.clone().unwrap_or_default(),
             _ => String::new(),
         }
     }
