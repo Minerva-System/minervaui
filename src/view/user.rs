@@ -124,7 +124,9 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
                 Err(msg) => {
                     s.add_layer(Dialog::info(format!(
                         "Erro ao cadastrar o usuário:\nHTTP {}: {}\n{}",
-                        msg.status, msg.message, msg.details
+                        msg.status,
+                        msg.message,
+                        msg.details.unwrap_or("".into())
                     )));
                 }
             };
