@@ -11,3 +11,5 @@ cursive = "0.20.0"
 cursive_table_view = "0.14.0"
 uuid = { version = "1.8.0", features = ["serde", "v4"] }
 lazy_static = "1.4.0"
+reqwest = { version = "0.12.2", features = ["blocking", "json"] }
+serde = { version = "1.0.197", features = ["serde_derive"] }
