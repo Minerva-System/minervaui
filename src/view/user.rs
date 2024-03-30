@@ -43,7 +43,7 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
                 .child(make_info("Login:", &user.login))
                 .child(make_field("input_user_name", "Nome:", user.name))
                 .child(make_field(
-                    "email",
+                    "input_user_email",
                     "E-mail:",
                     user.email.unwrap_or(String::new()),
                 ))
@@ -141,6 +141,7 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
 
 pub fn show_user_list(s: &mut Cursive) {
     // Loading screen
+    s.set_autohide_menu(true);
     s.add_layer(
         Dialog::around(
             TextView::new("Carregando...")

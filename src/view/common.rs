@@ -8,6 +8,9 @@ pub enum CommonColumn {
     Login,
     Name,
     Email,
+    Description,
+    Price,
+    Unit,
 }
 
 impl TableViewItem<CommonColumn> for model::user::User {
@@ -30,6 +33,31 @@ impl TableViewItem<CommonColumn> for model::user::User {
             CommonColumn::Login => self.login.cmp(&other.login),
             CommonColumn::Name => self.name.cmp(&other.name),
             CommonColumn::Email => self.email.cmp(&other.email),
+            _ => Ordering::Equal,
+        }
+    }
+}
+
+impl TableViewItem<CommonColumn> for model::products::Product {
+    fn to_column(&self, column: CommonColumn) -> String {
+        match column {
+            CommonColumn::ID => self.id.to_string(),
+            CommonColumn::Description => self.description.clone(),
+            CommonColumn::Price => format!("{:.2}", self.price),
+            CommonColumn::Unit => self.unit.clone(),
+            _ => String::new(),
+        }
+    }
+
+    fn cmp(&self, other: &Self, column: CommonColumn) -> std::cmp::Ordering
+    where
+        Self: Sized,
+    {
+        match column {
+            CommonColumn::ID => self.id.cmp(&other.id),
+            CommonColumn::Description => self.description.cmp(&other.description),
+            CommonColumn::Price => self.price.cmp(&other.price),
+            CommonColumn::Unit => self.unit.cmp(&other.unit),
             _ => Ordering::Equal,
         }
     }

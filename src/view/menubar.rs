@@ -5,6 +5,8 @@ pub fn show_menubar(siv: &mut Cursive) {
         .add_subtree(
             "Ações",
             menu::Tree::new()
+                .leaf("Ponto de Venda...", |_| {})
+                .delimiter()
                 .leaf("Sobre o Minerva System...", |s| {
                     show_about(s);
                 })
@@ -17,19 +19,22 @@ pub fn show_menubar(siv: &mut Cursive) {
                 .subtree(
                     "Usuários",
                     menu::Tree::new()
-                        .leaf("Lista de usuários...", |s| {
-                            s.set_autohide_menu(true);
+                        .leaf("Ver usuários...", |s| {
                             super::user::show_user_list(s);
                         })
-                        .leaf("Cadastrar usuários...", |s| {
+                        .leaf("Novo usuário...", |s| {
                             super::user::show_user_form(s, None);
                         }),
                 )
                 .subtree(
                     "Produtos",
                     menu::Tree::new()
-                        .leaf("Lista de produtos...", |_s| {})
-                        .leaf("Cadastrar produtos...", |_s| {}),
+                        .leaf("Ver produtos...", |s| {
+                            super::products::show_product_list(s);
+                        })
+                        .leaf("Novo produto...", |s| {
+                            super::products::show_product_form(s, None);
+                        }),
                 ),
         )
         .add_subtree(
@@ -42,20 +47,17 @@ pub fn show_menubar(siv: &mut Cursive) {
             ),
         );
     siv.set_autohide_menu(false);
-    // use cursive::event::{EventResult, EventTrigger};
-    // siv.set_on_pre_event_inner(EventTrigger::any(), |_| {
-    //     if *LOADING.lock().unwrap() {
-    //         Some(EventResult::Ignored)
-    //     } else {
-    //         None
-    //     }
-    // });
 
     siv.add_global_callback(Key::Esc, |s| s.select_menubar());
 }
 
 fn show_about(s: &mut Cursive) {
-    s.add_layer(Dialog::info(
-        "Minerva System v0.0.0\nCopyright (c) 2024 Lucas S. Vieira",
-    ));
+    let name = env!("CARGO_PKG_NAME");
+    let version = env!("CARGO_PKG_VERSION");
+    let license = env!("CARGO_PKG_LICENSE");
+    let authors = env!("CARGO_PKG_AUTHORS");
+    s.add_layer(Dialog::info(format!(
+        "Minerva System v{} — {}\nFront-End para Console\n\nCopyright (c) 2024 {}\nDistribuído sob a licença {}.",
+        version, name, authors, license
+    )));
 }
