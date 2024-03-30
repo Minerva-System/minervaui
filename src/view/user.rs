@@ -7,10 +7,10 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
     let input_rect = Rect::from_size((0, 0), (40, 1));
     let label_rect = Rect::from_size((0, 0), (10, 1));
 
-    let make_info = |label: &str, content: &str| -> LinearLayout {
+    let make_info = |name: &str, label: &str, content: &str| -> LinearLayout {
         LinearLayout::horizontal()
             .child(FixedLayout::new().child(label_rect, TextView::new(label)))
-            .child(FixedLayout::new().child(input_rect, TextView::new(content)))
+            .child(FixedLayout::new().child(input_rect, TextView::new(content).with_name(name)))
     };
 
     let make_edit = |name: &str, content: String, secret: bool| -> FixedLayout {
@@ -39,8 +39,8 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
         Some(user) => {
             let user_id = user.id.to_string();
             LinearLayout::vertical()
-                .child(make_info("UUID:", &user_id))
-                .child(make_info("Login:", &user.login))
+                .child(make_info("info_user_uuid", "UUID:", &user_id))
+                .child(make_info("info_user_login", "Login:", &user.login))
                 .child(make_field("input_user_name", "Nome:", user.name))
                 .child(make_field(
                     "input_user_email",
@@ -49,7 +49,11 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
                 ))
         }
         None => LinearLayout::vertical()
-            .child(make_info("UUID:", "(será gerado automaticamente)"))
+            .child(make_info(
+                "info_user_uuid",
+                "UUID:",
+                "(será gerado automaticamente)",
+            ))
             .child(make_field("input_user_login", "Login:", String::new()))
             .child(make_field("input_user_name", "Nome:", String::new()))
             .child(make_field("input_user_email", "E-mail:", String::new()))
@@ -69,7 +73,44 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
 
     if editing {
         dialog.add_button("Salvar", |_| {});
-        dialog.add_button("Remover", |_| {});
+        dialog.add_button("Remover", |s| {
+            s.add_layer(
+                Dialog::around(TextView::new("Deseja realmente remover este usuário?"))
+                    .button("Não", |s| {
+                        s.pop_layer();
+                    })
+                    .button("Sim", |s| {
+                        s.pop_layer();
+                        use crate::controller::user as controller;
+
+                        let uuid: String = match s
+                            .call_on_name("info_user_uuid", |view: &mut TextView| {
+                                view.get_content()
+                            }) {
+                            Some(s) => s.source().into(),
+                            None => return,
+                        };
+
+                        let uuid: uuid::Uuid = match uuid::Uuid::parse_str(&uuid) {
+                            Ok(u) => u,
+                            Err(_) => return,
+                        };
+
+                        if let Err(msg) = controller::remove_user(uuid) {
+                            s.add_layer(Dialog::info(format!(
+                                "Erro ao remover o usuário:\nHTTP {}: {}\n{}",
+                                msg.status,
+                                msg.message,
+                                msg.details.unwrap_or("".into())
+                            )));
+                        } else {
+                            // Pop user form
+                            s.pop_layer();
+                            // TODO: Refresh list
+                        }
+                    }),
+            );
+        });
     } else {
         dialog.add_button("Cadastrar", |s| {
             // Fetch info

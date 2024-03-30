@@ -49,3 +49,23 @@ pub fn create_user(u: model::NewUser) -> Result<model::User, ErrorMessage> {
         },
     }
 }
+
+pub fn remove_user(id: uuid::Uuid) -> Result<(), ErrorMessage> {
+    let route = format!("{}/users/{}", super::MINERVAHOST.lock().unwrap(), id);
+    let client = reqwest::blocking::Client::new();
+    let response = client
+        .delete(route)
+        .send()
+        .map_err(|_| ErrorMessage::default())?;
+
+    match response.status() {
+        reqwest::StatusCode::OK => Ok(()),
+        _ => match response.json::<ErrorMessage>() {
+            Ok(e) => Err(e),
+            Err(e) => Err(ErrorMessage::internal(
+                "Could not parse error message",
+                Some(e.to_string()),
+            )),
+        },
+    }
+}
