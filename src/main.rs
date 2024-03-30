@@ -5,7 +5,7 @@ mod view;
 fn main() {
     let mut siv = cursive::default();
 
-    view::menubar::show_menubar(&mut siv);
+    view::login::show_login(&mut siv);
 
     siv.run();
 }

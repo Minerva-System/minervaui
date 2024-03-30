@@ -2,9 +2,8 @@ use crate::model::message::ErrorMessage;
 use crate::model::user as model;
 
 pub fn get_user_index() -> Result<Vec<model::User>, ErrorMessage> {
-    // Run request
-    let response = reqwest::blocking::get("http://192.168.3.6:30000/api/v1/users")
-        .map_err(|_| ErrorMessage::default())?;
+    let route = format!("{}/users", super::MINERVAHOST.lock().unwrap());
+    let response = reqwest::blocking::get(route).map_err(|_| ErrorMessage::default())?;
 
     match response.status() {
         reqwest::StatusCode::OK => match response.json::<Vec<model::User>>() {
@@ -25,9 +24,10 @@ pub fn get_user_index() -> Result<Vec<model::User>, ErrorMessage> {
 }
 
 pub fn create_user(u: model::NewUser) -> Result<model::User, ErrorMessage> {
+    let route = format!("{}/users", super::MINERVAHOST.lock().unwrap());
     let client = reqwest::blocking::Client::new();
     let response = client
-        .post("http://192.168.3.6:30000/api/v1/users")
+        .post(route)
         .json(&u)
         .send()
         .map_err(|_| ErrorMessage::default())?;

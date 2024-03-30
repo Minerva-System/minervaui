@@ -2,9 +2,10 @@ use crate::model::message::ErrorMessage;
 use crate::model::products as model;
 
 pub fn create_product(p: model::NewProduct) -> Result<model::Product, ErrorMessage> {
+    let route = format!("{}/products", super::MINERVAHOST.lock().unwrap());
     let client = reqwest::blocking::Client::new();
     let response = client
-        .post("http://192.168.3.6:30000/api/v1/products")
+        .post(route)
         .json(&p)
         .send()
         .map_err(|_| ErrorMessage::default())?;
@@ -28,9 +29,8 @@ pub fn create_product(p: model::NewProduct) -> Result<model::Product, ErrorMessa
 }
 
 pub fn get_product_index() -> Result<Vec<model::Product>, ErrorMessage> {
-    // Run request
-    let response = reqwest::blocking::get("http://192.168.3.6:30000/api/v1/products")
-        .map_err(|_| ErrorMessage::default())?;
+    let route = format!("{}/products", super::MINERVAHOST.lock().unwrap());
+    let response = reqwest::blocking::get(route).map_err(|_| ErrorMessage::default())?;
 
     match response.status() {
         reqwest::StatusCode::OK => match response.json::<Vec<model::Product>>() {
