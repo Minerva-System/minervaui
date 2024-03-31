@@ -82,6 +82,7 @@ impl TableViewItem<CommonColumn> for model::sales::SaleItem {
         match column {
             CommonColumn::ID => format!("{}", self.id),
             CommonColumn::Description => self.product.description.clone(),
+            CommonColumn::Price => format!("{:.2}", self.product.price),
             CommonColumn::Unit => self.product.unit.clone(),
             CommonColumn::Amount => format!("{:.3}", self.amount),
             CommonColumn::Total => format!("{:.2}", self.product.price * self.amount),
@@ -96,6 +97,7 @@ impl TableViewItem<CommonColumn> for model::sales::SaleItem {
         match column {
             CommonColumn::ID => self.id.cmp(&other.id),
             CommonColumn::Description => self.product.description.cmp(&other.product.description),
+            CommonColumn::Price => self.product.price.cmp(&other.product.price),
             CommonColumn::Unit => self.product.unit.cmp(&other.product.unit),
             CommonColumn::Amount => self.amount.cmp(&other.amount),
             _ => Ordering::Equal,

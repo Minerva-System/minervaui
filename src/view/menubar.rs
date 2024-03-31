@@ -5,10 +5,6 @@ pub fn show_menubar(siv: &mut Cursive) {
         .add_subtree(
             "Ações",
             menu::Tree::new()
-                .leaf("Ponto de Venda...", |s| {
-                    super::pdv::show_pdv(s);
-                })
-                .delimiter()
                 .leaf("Sobre o Minerva System...", |s| {
                     show_about(s);
                 })
@@ -47,7 +43,10 @@ pub fn show_menubar(siv: &mut Cursive) {
                     .leaf("Curva ABC de Produtos...", |_s| {})
                     .leaf("Curva ABC de Clientes...", |_s| {}),
             ),
-        );
+        )
+        .add_leaf("PDV", |s| {
+            super::pdv::show_pdv(s);
+        });
     siv.set_autohide_menu(false);
 
     siv.add_global_callback(Key::Esc, |s| s.select_menubar());

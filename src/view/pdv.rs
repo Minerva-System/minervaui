@@ -35,14 +35,10 @@ pub fn show_pdv(s: &mut Cursive) {
     let make_info = |name: &str, label: &str, content: &str| -> LinearLayout {
         LinearLayout::horizontal()
             .child(FixedLayout::new().child(*LABEL_RECT, TextView::new(label)))
-            .child(
-                FixedLayout::new().child(
-                    *INPUT_RECT,
-                    TextView::new(content)
-                        .h_align(HAlign::Right)
-                        .with_name(name),
-                ),
-            )
+            .child(FixedLayout::new().child(
+                *INPUT_RECT,
+                TextView::new(content).h_align(HAlign::Left).with_name(name),
+            ))
     };
 
     let make_edit = |name: &str, content: String, secret: bool| -> FixedLayout {
@@ -68,11 +64,14 @@ pub fn show_pdv(s: &mut Cursive) {
     use crate::model::sales::SaleItem;
 
     let mut table = TableView::<SaleItem, CommonColumn>::new()
+        .column(CommonColumn::ID, "ID", |c| {
+            c.width_percent(5).align(HAlign::Left)
+        })
         .column(CommonColumn::Description, "Produto", |c| {
             c.width_percent(50).align(HAlign::Left)
         })
         .column(CommonColumn::Unit, "Unid.", |c| {
-            c.width_percent(4).align(HAlign::Center)
+            c.width_percent(5).align(HAlign::Center)
         })
         .column(CommonColumn::Price, "Preço", |c| {
             c.width_percent(8).align(HAlign::Right)
@@ -83,6 +82,51 @@ pub fn show_pdv(s: &mut Cursive) {
         .column(CommonColumn::Total, "Total", |c| {
             c.width_percent(8).align(HAlign::Right)
         });
+
+    // Teste
+    use rust_decimal_macros::dec;
+    let items = vec![
+        SaleItem {
+            id: 0,
+            product: crate::model::products::Product {
+                id: uuid::Uuid::new_v4(),
+                description: "Picanha".into(),
+                price: dec!(99.0),
+                unit: "KG".into(),
+                created_at: chrono::offset::Utc::now(),
+                updated_at: chrono::offset::Utc::now(),
+                deleted_at: None,
+            },
+            amount: dec!(0.3),
+        },
+        SaleItem {
+            id: 1,
+            product: crate::model::products::Product {
+                id: uuid::Uuid::new_v4(),
+                description: "Patinho".into(),
+                price: dec!(95.0),
+                unit: "KG".into(),
+                created_at: chrono::offset::Utc::now(),
+                updated_at: chrono::offset::Utc::now(),
+                deleted_at: None,
+            },
+            amount: dec!(0.5),
+        },
+        SaleItem {
+            id: 2,
+            product: crate::model::products::Product {
+                id: uuid::Uuid::new_v4(),
+                description: "Acém (moído)".into(),
+                price: dec!(29.90),
+                unit: "KG".into(),
+                created_at: chrono::offset::Utc::now(),
+                updated_at: chrono::offset::Utc::now(),
+                deleted_at: None,
+            },
+            amount: dec!(1.5),
+        },
+    ];
+    table.set_items(items.clone());
 
     let layout = LinearLayout::vertical()
         .child(make_select_info(
@@ -105,9 +149,20 @@ pub fn show_pdv(s: &mut Cursive) {
         .child(make_field(
             "input_pdv_discount",
             "Descontos:",
-            String::new(),
+            "0.00".into(),
         ))
-        .child(make_info("input_pdv_saletotal", "Total da venda:", "0.00"));
+        // TODO: Update this field when changing the items
+        .child(make_info(
+            "input_pdv_saletotal",
+            "Total da venda:",
+            &format!(
+                "{:.2}",
+                items
+                    .iter()
+                    .map(|item| item.product.price)
+                    .sum::<rust_decimal::Decimal>()
+            ),
+        ));
 
     let dialog = Dialog::around(layout)
         .title("Ponto de Venda")
