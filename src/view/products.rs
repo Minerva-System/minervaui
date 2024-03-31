@@ -237,15 +237,20 @@ pub fn show_product_list(s: &mut Cursive) {
             let size = (100, 20);
 
             let mut table = TableView::<Product, CommonColumn>::new()
-                .column(CommonColumn::Description, "Descrição", |c| c)
+                .column(CommonColumn::Description, "Descrição", |c| {
+                    c.width_percent(40).align(HAlign::Left)
+                })
                 .column(CommonColumn::Unit, "Unid.", |c| {
-                    c.width_percent(5).align(HAlign::Center)
+                    c.width_percent(4).align(HAlign::Center)
                 })
                 .column(CommonColumn::Price, "Preço", |c| {
-                    c.width_percent(10).align(HAlign::Right)
+                    c.width_percent(8).align(HAlign::Right)
                 })
-                .column(CommonColumn::ID, "UUID", |c| {
-                    c.align(HAlign::Left).width_percent(38)
+                .column(CommonColumn::CreatedAt, "Criado Em", |c| {
+                    c.align(HAlign::Right).width_percent(15)
+                })
+                .column(CommonColumn::UpdatedAt, "Última Atualiz.", |c| {
+                    c.align(HAlign::Right).width_percent(15)
                 });
 
             table.set_items(items);

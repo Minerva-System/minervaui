@@ -11,7 +11,11 @@ pub enum CommonColumn {
     Description,
     Price,
     Unit,
+    CreatedAt,
+    UpdatedAt,
 }
+
+const DATE_FORMAT: &str = "%d/%m/%Y %H:%M:%S";
 
 impl TableViewItem<CommonColumn> for model::user::User {
     fn to_column(&self, column: CommonColumn) -> String {
@@ -20,6 +24,8 @@ impl TableViewItem<CommonColumn> for model::user::User {
             CommonColumn::Login => self.login.clone(),
             CommonColumn::Name => self.name.clone(),
             CommonColumn::Email => self.email.clone().unwrap_or_default(),
+            CommonColumn::CreatedAt => self.created_at.format(DATE_FORMAT).to_string(),
+            CommonColumn::UpdatedAt => self.updated_at.format(DATE_FORMAT).to_string(),
             _ => String::new(),
         }
     }
@@ -33,6 +39,8 @@ impl TableViewItem<CommonColumn> for model::user::User {
             CommonColumn::Login => self.login.cmp(&other.login),
             CommonColumn::Name => self.name.cmp(&other.name),
             CommonColumn::Email => self.email.cmp(&other.email),
+            CommonColumn::CreatedAt => self.created_at.cmp(&other.created_at),
+            CommonColumn::UpdatedAt => self.created_at.cmp(&other.updated_at),
             _ => Ordering::Equal,
         }
     }
@@ -45,6 +53,8 @@ impl TableViewItem<CommonColumn> for model::products::Product {
             CommonColumn::Description => self.description.clone(),
             CommonColumn::Price => format!("{:.2}", self.price),
             CommonColumn::Unit => self.unit.clone(),
+            CommonColumn::CreatedAt => self.created_at.format(DATE_FORMAT).to_string(),
+            CommonColumn::UpdatedAt => self.updated_at.format(DATE_FORMAT).to_string(),
             _ => String::new(),
         }
     }
@@ -58,6 +68,8 @@ impl TableViewItem<CommonColumn> for model::products::Product {
             CommonColumn::Description => self.description.cmp(&other.description),
             CommonColumn::Price => self.price.cmp(&other.price),
             CommonColumn::Unit => self.unit.cmp(&other.unit),
+            CommonColumn::CreatedAt => self.created_at.cmp(&other.created_at),
+            CommonColumn::UpdatedAt => self.created_at.cmp(&other.updated_at),
             _ => Ordering::Equal,
         }
     }
