@@ -13,6 +13,8 @@ pub enum CommonColumn {
     Unit,
     CreatedAt,
     UpdatedAt,
+    Amount,
+    Total,
 }
 
 const DATE_FORMAT: &str = "%d/%m/%Y %H:%M:%S";
@@ -70,6 +72,32 @@ impl TableViewItem<CommonColumn> for model::products::Product {
             CommonColumn::Unit => self.unit.cmp(&other.unit),
             CommonColumn::CreatedAt => self.created_at.cmp(&other.created_at),
             CommonColumn::UpdatedAt => self.created_at.cmp(&other.updated_at),
+            _ => Ordering::Equal,
+        }
+    }
+}
+
+impl TableViewItem<CommonColumn> for model::sales::SaleItem {
+    fn to_column(&self, column: CommonColumn) -> String {
+        match column {
+            CommonColumn::ID => format!("{}", self.id),
+            CommonColumn::Description => self.product.description.clone(),
+            CommonColumn::Unit => self.product.unit.clone(),
+            CommonColumn::Amount => format!("{:.3}", self.amount),
+            CommonColumn::Total => format!("{:.2}", self.product.price * self.amount),
+            _ => String::new(),
+        }
+    }
+
+    fn cmp(&self, other: &Self, column: CommonColumn) -> std::cmp::Ordering
+    where
+        Self: Sized,
+    {
+        match column {
+            CommonColumn::ID => self.id.cmp(&other.id),
+            CommonColumn::Description => self.product.description.cmp(&other.product.description),
+            CommonColumn::Unit => self.product.unit.cmp(&other.product.unit),
+            CommonColumn::Amount => self.amount.cmp(&other.amount),
             _ => Ordering::Equal,
         }
     }

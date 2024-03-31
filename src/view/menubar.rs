@@ -5,7 +5,9 @@ pub fn show_menubar(siv: &mut Cursive) {
         .add_subtree(
             "Ações",
             menu::Tree::new()
-                .leaf("Ponto de Venda...", |_| {})
+                .leaf("Ponto de Venda...", |s| {
+                    super::pdv::show_pdv(s);
+                })
                 .delimiter()
                 .leaf("Sobre o Minerva System...", |s| {
                     show_about(s);
