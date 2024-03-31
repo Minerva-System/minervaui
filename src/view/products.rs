@@ -7,10 +7,10 @@ pub fn show_product_form(s: &mut Cursive, product: Option<Product>) {
     let input_rect = Rect::from_size((0, 0), (40, 1));
     let label_rect = Rect::from_size((0, 0), (11, 1));
 
-    let make_info = |label: &str, content: &str| -> LinearLayout {
+    let make_info = |name: &str, label: &str, content: &str| -> LinearLayout {
         LinearLayout::horizontal()
             .child(FixedLayout::new().child(label_rect, TextView::new(label)))
-            .child(FixedLayout::new().child(input_rect, TextView::new(content)))
+            .child(FixedLayout::new().child(input_rect, TextView::new(content).with_name(name)))
     };
 
     let make_edit = |name: &str, content: String, secret: bool| -> FixedLayout {
@@ -54,7 +54,7 @@ pub fn show_product_form(s: &mut Cursive, product: Option<Product>) {
         Some(product) => {
             let product_id = product.id.to_string();
             LinearLayout::vertical()
-                .child(make_info("UUID:", &product_id))
+                .child(make_info("info_product_uuid", "UUID:", &product_id))
                 .child(make_field(
                     "input_product_description",
                     "Descrição:",
@@ -72,7 +72,11 @@ pub fn show_product_form(s: &mut Cursive, product: Option<Product>) {
                 ))
         }
         None => LinearLayout::vertical()
-            .child(make_info("UUID:", "(será gerado automaticamente)"))
+            .child(make_info(
+                "info_product_uuid",
+                "UUID:",
+                "(será gerado automaticamente)",
+            ))
             .child(make_field(
                 "input_product_description",
                 "Descrição:",
@@ -98,7 +102,52 @@ pub fn show_product_form(s: &mut Cursive, product: Option<Product>) {
 
     if editing {
         dialog.add_button("Salvar", |_| {});
-        dialog.add_button("Remover", |_| {});
+        dialog.add_button("Remover", |s| {
+            s.add_layer(
+                Dialog::around(TextView::new("Deseja realmente remover este produto?"))
+                    .button("Não", |s| {
+                        s.pop_layer();
+                    })
+                    .button("Sim", |s| {
+                        s.pop_layer();
+                        use crate::controller::products as controller;
+
+                        let uuid: String = match s
+                            .call_on_name("info_product_uuid", |view: &mut TextView| {
+                                view.get_content()
+                            }) {
+                            Some(s) => s.source().into(),
+                            None => return,
+                        };
+
+                        let uuid: uuid::Uuid = match uuid::Uuid::parse_str(&uuid) {
+                            Ok(u) => u,
+                            Err(_) => return,
+                        };
+
+                        if let Err(msg) = controller::remove_product(uuid) {
+                            s.add_layer(Dialog::info(format!(
+                                "Erro ao remover o produto:\nHTTP {}: {}\n{}",
+                                msg.status,
+                                msg.message,
+                                msg.details.unwrap_or("".into())
+                            )));
+                        } else {
+                            // Pop user form
+                            s.pop_layer();
+                            // Refresh list
+                            s.call_on_name(
+                                "product_table",
+                                |table: &mut TableView<Product, CommonColumn>| {
+                                    let items =
+                                        controller::get_product_index().expect("Product list");
+                                    table.set_items(items);
+                                },
+                            );
+                        }
+                    }),
+            );
+        });
     } else {
         dialog.add_button("Cadastrar", |s| {
             use crate::controller::products as controller;

@@ -106,7 +106,14 @@ pub fn show_user_form(s: &mut Cursive, user: Option<User>) {
                         } else {
                             // Pop user form
                             s.pop_layer();
-                            // TODO: Refresh list
+                            // Refresh list
+                            s.call_on_name(
+                                "user_table",
+                                |table: &mut TableView<User, CommonColumn>| {
+                                    let items = controller::get_user_index().expect("User list");
+                                    table.set_items(items);
+                                },
+                            );
                         }
                     }),
             );
